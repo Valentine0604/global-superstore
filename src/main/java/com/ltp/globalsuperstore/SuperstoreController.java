@@ -4,8 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import javax.validation.Valid;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,15 +21,20 @@ public class SuperstoreController {
 
     @GetMapping("/")
     public String getForm(Model model, @RequestParam(required = false) String id){
-        model.addAttribute("categories", Constants.CATEGORIES);
         model.addAttribute("item", getItemIndex(id) == Constants.NOT_FOUND ? new Item() : items.get(getItemIndex(id)));
         return "form";
     }
 
     @PostMapping("/submitItem")
-    public String handleSubmit(Item item, RedirectAttributes redirectAttributes){
+    public String handleSubmit(@Valid Item item, BindingResult result, RedirectAttributes redirectAttributes){
         int index = getItemIndex(item.getId());
         String status = Constants.SUCCESS_STATUS;
+        if(result.hasErrors()){
+            return "form";
+        }
+        if(item.getPrice() < item.getDiscount()){
+            result.rejectValue("price", "", "Price cannot be less than discount");
+        }
         if(index == Constants.NOT_FOUND){
             items.add(item);
         }
