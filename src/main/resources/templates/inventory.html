@@ -7,7 +7,14 @@
             <a  th:href="@{/}" >Form</a>
             <a class="active" th:href="@{/inventory}">Inventory</a>
         </div>
-   
+        <br>
+        <div class="alert success" th:if="${status}  == 'success'">
+            <strong>You successfully submited the item!</strong>
+        </div>
+        <div class="alert" th:if="${status} == 'failed'">
+            <strong>You failed to submit the item.</strong>
+        </div>
+        <br>
         <div class="container">
            <table>
               <tr class="head">
