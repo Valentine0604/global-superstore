@@ -6,8 +6,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import javax.validation.Valid;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,8 +26,6 @@ public class GlobalSuperstoreController {
     public String getForm(Model model, @RequestParam(required = false) String id){
 
         int index = getItemIndex(id);
-
-        model.addAttribute("categories", Constants.CATEGORIES);
         model.addAttribute("item", index == Constants.NOT_FOUND ? new Item() : items.get(index));
         return "form";
     }
@@ -36,7 +37,13 @@ public class GlobalSuperstoreController {
     }
 
     @PostMapping("/submitItem")
-    public String handleSubmit(Item item, RedirectAttributes redirectAttributes) {
+    public String handleSubmit(@Valid Item item, BindingResult result, RedirectAttributes redirectAttributes) {
+
+        if(item.getPrice() < item.getDiscount()){
+            result.rejectValue("price", "", "Price cannot be less than the discount");
+        }
+
+        if(result.hasErrors()) return "form";
 
         int index = getItemIndex(item.getId());
         String status = Constants.SUCCESS_STATUS;
